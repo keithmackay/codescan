@@ -6,12 +6,23 @@ CodeScan is a portable, script-first command-line tool for assessing a software 
 
 ## Installation
 
-Placeholder.
+Requires Python 3.11 or newer.
+
+```shell
+python -m pip install .
+```
+
+For development, install `python -m pip install -e ".[dev]"`.
 
 ## Usage
 
-Placeholder.
+```shell
+codescan --version
+codescan scan PATH --output OUTPUT_DIR
+```
+
+The initial release is under development. The CLI currently validates the project path; full inventory and report generation are planned for Phase 2. CodeScan does not execute project code by default.
 
 ## License
 
-Placeholder.
+Proprietary. See the repository owner for licensing terms.
