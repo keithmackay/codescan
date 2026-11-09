@@ -1,10 +1,10 @@
 # Command-line interface
 
-The initial package exposes `codescan --version` and `codescan scan PATH`. The scan subcommand validates that `PATH` exists and is a directory. Inventory and report generation are under development; the command currently returns a clear not-implemented status after validation.
-
 ```shell
 codescan --version
-codescan scan ./project --output ./codescan-output
+codescan scan PATH [--output DIR] [--exclude PATTERN] [--include-hidden] [--force]
 ```
 
-The `--output` option is reserved for the Phase 2 output bundle. No target project code is executed.
+A scan writes `report.md`, `files.csv`, and `results.json`. By default the output directory is `PATH/codescan-output`; use `--output` to choose another location. Existing report artifacts are protected unless `--force` is supplied. Repeat `--exclude` to omit matching relative path patterns. Hidden files and folders are excluded by default; `--include-hidden` includes them.
+
+CodeScan skips common generated/vendor folders and does not follow symlinks. It does not execute target project code or make network requests. The MVP currently measures file inventory only; quality analyzers and platform integrations are not yet available.

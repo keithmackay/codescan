@@ -21,7 +21,7 @@ codescan --version
 codescan scan PATH --output OUTPUT_DIR
 ```
 
-The initial release is under development. The CLI currently validates the project path; full inventory and report generation are planned for Phase 2. CodeScan does not execute project code by default.
+The MVP scans local files and writes a Markdown report, CSV inventory, and normalized JSON results. It does not execute project code or make network requests. LOC means nonblank physical lines; language is inferred from file extension. Quality and hosted-service analyzers are planned for later phases.
 
 ## License
 
