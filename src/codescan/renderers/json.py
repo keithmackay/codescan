@@ -4,21 +4,30 @@ from __future__ import annotations
 
 import json
 from collections.abc import Sequence
+from dataclasses import asdict
 from datetime import UTC, datetime
 
 from codescan import __version__
 from codescan.analyzers.inventory import FileInventory
+from codescan.models import AnalyzerStatus, Finding
 
 
-def render_results(root_label: str, items: Sequence[FileInventory], scan_id: str) -> str:
+def render_results(
+    root_label: str,
+    items: Sequence[FileInventory],
+    scan_id: str,
+    findings: Sequence[Finding] = (),
+    analyzers: Sequence[AnalyzerStatus] = (),
+) -> str:
     payload = {
         "schema_version": "1.0",
         "scan_id": scan_id,
         "codescan_version": __version__,
         "started_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "root_label": root_label,
-        "analyzers": [{"name": "inventory", "status": "completed"}],
-        "findings": [],
+        "analyzers": [asdict(item) for item in analyzers]
+        or [{"name": "inventory", "status": "completed"}],
+        "findings": [asdict(item) for item in findings],
         "files": [
             {
                 "path": item.path,

@@ -6,7 +6,10 @@ import uuid
 from pathlib import Path
 
 from codescan.analyzers.inventory import FileInventory, inventory_file
+from codescan.analyzers.repository import analyze_repository
+from codescan.analyzers.tests_docs import analyze_tests_docs
 from codescan.discovery import discover_files
+from codescan.models import AnalyzerStatus
 from codescan.renderers.csv import render_inventory_csv
 from codescan.renderers.json import render_results
 from codescan.renderers.markdown import render_report
@@ -44,10 +47,26 @@ def write_scan(
         )
     items = collect_inventory(root, excludes=excludes, include_hidden=include_hidden)
     root_label = root.name or root.anchor
+    repository_findings = analyze_repository(root)
+    tests_docs_findings, tests_docs_status = analyze_tests_docs(root)
+    findings = [*repository_findings, *tests_docs_findings]
+    analyzers = [
+        AnalyzerStatus(name="inventory", status="completed"),
+        AnalyzerStatus(name="repository_hygiene", status="completed"),
+        AnalyzerStatus(name="tests_docs_discovery", status=tests_docs_status),
+        AnalyzerStatus(
+            name="complexity", status="skipped", message="Not implemented in this release."
+        ),
+        AnalyzerStatus(
+            name="dependency_risk", status="skipped", message="Not implemented in this release."
+        ),
+    ]
     artifacts = {
-        "report.md": render_report(root_label, items),
+        "report.md": render_report(root_label, items, findings=findings),
         "files.csv": render_inventory_csv(items),
-        "results.json": render_results(root_label, items, str(uuid.uuid4())),
+        "results.json": render_results(
+            root_label, items, str(uuid.uuid4()), findings=findings, analyzers=analyzers
+        ),
     }
     for name, content in artifacts.items():
         destination = output / name
