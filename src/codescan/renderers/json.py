@@ -8,8 +8,10 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 
 from codescan import __version__
+from codescan.analyzers.dependencies import Dependency
 from codescan.analyzers.inventory import FileInventory
-from codescan.models import AnalyzerStatus, Finding
+from codescan.analyzers.osv_scanner import PackageLicense, Vulnerability
+from codescan.models import AnalyzerStatus, Finding, ScanScope
 
 
 def render_results(
@@ -18,6 +20,10 @@ def render_results(
     scan_id: str,
     findings: Sequence[Finding] = (),
     analyzers: Sequence[AnalyzerStatus] = (),
+    dependencies: Sequence[Dependency] = (),
+    vulnerabilities: Sequence[Vulnerability] = (),
+    package_licenses: Sequence[PackageLicense] = (),
+    scope: ScanScope | None = None,
 ) -> str:
     payload = {
         "schema_version": "1.0",
@@ -25,9 +31,13 @@ def render_results(
         "codescan_version": __version__,
         "started_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "root_label": root_label,
+        "scope": asdict(scope or ScanScope()),
         "analyzers": [asdict(item) for item in analyzers]
         or [{"name": "inventory", "status": "completed"}],
         "findings": [asdict(item) for item in findings],
+        "dependencies": [item.to_dict() for item in dependencies],
+        "vulnerabilities": [item.to_dict() for item in vulnerabilities],
+        "package_licenses": [item.to_dict() for item in package_licenses],
         "files": [
             {
                 "path": item.path,

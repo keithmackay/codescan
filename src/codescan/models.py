@@ -41,6 +41,14 @@ class Finding:
 
 
 @dataclass(frozen=True)
+class ScanScope:
+    include_hidden: bool = False
+    exclude_patterns: tuple[str, ...] = ()
+    default_ignored_directories: tuple[str, ...] = ()
+    follow_symlinks: bool = False
+
+
+@dataclass(frozen=True)
 class ScanResult:
     scan_id: str
     codescan_version: str

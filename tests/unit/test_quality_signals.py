@@ -37,3 +37,51 @@ def test_missing_tests_or_docs_are_unknown_signals_not_quality_verdicts(tmp_path
     findings, _ = analyze_tests_docs(tmp_path)
     assert all("not detected" in item.summary for item in findings)
     assert all(item.severity is None for item in findings)
+
+
+def test_cobertura_coverage_percentage_is_parsed_with_evidence(tmp_path):
+    (tmp_path / "coverage.xml").write_text(
+        '<coverage line-rate="0.875" lines-covered="7" lines-valid="8"/>',
+        encoding="utf-8",
+    )
+
+    findings, status = analyze_tests_docs(tmp_path)
+
+    coverage = next(item for item in findings if item.id == "COVERAGE-ARTIFACT-001")
+    assert status == "completed"
+    assert "87.5%" in coverage.summary
+    assert coverage.evidence[0].detail == "7/8 lines (87.5%)"
+
+
+def test_lcov_coverage_percentage_is_parsed_from_line_totals(tmp_path):
+    (tmp_path / "lcov.info").write_text("TN:\nSF:src/main.py\nLF:10\nLH:6\nend_of_record\n")
+
+    findings, _ = analyze_tests_docs(tmp_path)
+
+    coverage = next(item for item in findings if item.id == "COVERAGE-ARTIFACT-001")
+    assert "60.0%" in coverage.summary
+    assert coverage.evidence[0].detail == "6/10 lines (60.0%)"
+
+
+def test_jacoco_coverage_percentage_is_parsed_from_line_counters(tmp_path):
+    (tmp_path / "jacoco.xml").write_text(
+        '<report><counter type="LINE" missed="3" covered="9"/></report>',
+        encoding="utf-8",
+    )
+
+    findings, status = analyze_tests_docs(tmp_path)
+
+    coverage = next(item for item in findings if item.id == "COVERAGE-ARTIFACT-001")
+    assert status == "completed"
+    assert "75.0%" in coverage.summary
+    assert coverage.evidence[0].detail == "9/12 lines (75.0%)"
+
+
+def test_invalid_coverage_artifact_is_partial_and_does_not_invent_a_percentage(tmp_path):
+    (tmp_path / "coverage.xml").write_text("<coverage line-rate='high'>", encoding="utf-8")
+
+    findings, status = analyze_tests_docs(tmp_path)
+
+    coverage = next(item for item in findings if item.id == "COVERAGE-ARTIFACT-001")
+    assert status == "partial"
+    assert "percentages are unavailable" in coverage.summary

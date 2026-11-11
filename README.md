@@ -19,9 +19,13 @@ For development, install `python -m pip install -e ".[dev]"`.
 ```shell
 codescan --version
 codescan scan PATH --output OUTPUT_DIR
+# Optional: query OSV.dev (requires OSV-Scanner)
+codescan scan PATH --vulnerability-scan online
+# Optional package license metadata via deps.dev (online only)
+codescan scan PATH --vulnerability-scan online --license-scan
 ```
 
-The MVP scans local files and writes a Markdown report, CSV inventory, and normalized JSON results. It does not execute project code or make network requests. LOC means nonblank physical lines; language is inferred from file extension. Quality and hosted-service analyzers are planned for later phases.
+The MVP scans local files and writes a Markdown report, CSV inventory, and normalized JSON results. Optional developer tracking uses seed-scoped IDs and an encrypted identity map; see [Developer identity workflow](docs/DEVELOPER_IDENTITIES.md). Scanning is local-only by default. Online vulnerability and package license lookups require explicit options; see [OSV-Scanner integration](docs/OSV_SCANNER.md). LOC means nonblank physical lines; language is inferred from file extension. More quality and hosted-service analyzers are planned for later phases.
 
 ## License
 
